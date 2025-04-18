@@ -11,8 +11,8 @@ public class QuickSort {
     }
 
     private static int partition(int[] arr, int low, int high) {
-        int pivot = arr[high];
-        int i = low - 1;
+        int pivot = arr[high];//last element
+        int i = low - 1;// -1
 
         for (int j = low; j < high; j++) {
             if (arr[j] < pivot) {
@@ -26,7 +26,7 @@ public class QuickSort {
         arr[i + 1] = arr[high];
         arr[high] = temp;
 
-        return i + 1;
+        return i + 1;//pivot position
     }
 
     public static void main(String[] args) {
