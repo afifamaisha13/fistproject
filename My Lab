@@ -1,0 +1,29 @@
+**********Unipolar NRZ
+
+clc;
+clear;
+data=[1 0 1 0 1 1 0];
+bit_duration=1;
+fs=100;
+t=0:1/fs:bit_duration-1/fs;
+N=length(data);
+time=0:1/fs:bit_duration*N-1/fs;
+
+unipolar=[];
+for i=1:N
+    if data(i)==1
+        unipolar=[unipolar ones(1,length(t))];
+    else
+        unipolar=[unipolar zeros(1,length(t))];
+    end
+end
+
+figure;
+plot(time,unipolar,'LineWidth',2);
+axis([0 bit_duration*N 0 1]);
+xlabel('Time');
+ylabel('Amplitude');
+title('Unipolar NRZ');
+xticks(0:bit_duration:N);
+yticks([0 1]);
+grid on;
