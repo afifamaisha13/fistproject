@@ -58,3 +58,174 @@ title('Polar NRZ');
 xticks(0:bit_duration:N);
 yticks([-1 0 1]);
 grid on;
+
+
+*************Polar RZ
+
+clc;
+clear;
+
+% Input binary data
+data = [1 0 1 1 0 0 1 0];
+
+% Bit and sampling specs
+bit_duration = 1;     % duration of one bit in seconds
+fs = 100;             % samples per second
+samples_per_bit = fs * bit_duration;
+half_samples = samples_per_bit / 2;
+
+% Time vector for full signal
+time = 0:1/fs:(length(data)*bit_duration) - 1/fs;
+
+% Generate the Polar RZ waveform
+polar_rz = [];
+
+for i = 1:length(data)
+    if data(i) == 1
+        % +1 V for first half, 0 V for second half
+        bit_wave = [ones(1, half_samples), zeros(1, half_samples)];
+    else
+        % -1 V for first half, 0 V for second half
+        bit_wave = [-ones(1, half_samples), zeros(1, half_samples)];
+    end
+    polar_rz = [polar_rz bit_wave];  % append the waveform for this bit
+end
+
+% Plot the Polar RZ signal
+figure;
+plot(time, polar_rz, 'LineWidth', 2);
+axis([0 length(data) * bit_duration -1.5 1.5]);
+grid on;
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+title('Polar RZ Line Coding');
+xticks(0:bit_duration:length(data));
+yticks([-1 0 1]);
+
+***********AMI
+
+clc;
+clear;
+
+% Input binary data
+data = [1 0 1 1 0 1 0 0 1];
+
+% Bit and sampling specifications
+bit_duration = 1;      % duration of one bit in seconds
+fs = 100;              % sampling frequency in Hz
+samples_per_bit = fs * bit_duration;
+
+% Time vector for full signal
+time = 0:1/fs:(length(data)*bit_duration) - 1/fs;
+
+% Initialize signal
+ami = [];
+last_polarity = -1;  % Initialize to -1 so first '1' becomes +1
+
+for i = 1:length(data)
+    if data(i) == 1
+        last_polarity = -last_polarity;  % Alternate polarity
+        bit_wave = last_polarity * ones(1, samples_per_bit);
+    else
+        bit_wave = zeros(1, samples_per_bit);
+    end
+    ami = [ami bit_wave];
+end
+
+% Plotting
+figure;
+plot(time, ami, 'LineWidth', 2);
+axis([0 length(data) * bit_duration -1.5 1.5]);
+grid on;
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+title('Bipolar AMI (Alternate Mark Inversion) Line Coding');
+xticks(0:bit_duration:length(data));
+yticks([-1 0 1]);
+
+***************2B1Q
+
+clc;
+clear;
+
+% Input binary data (length must be even for 2-bit grouping)
+data = [1 0 0 0 1 1 0 1];  % 8 bits = 4 symbols
+
+% Check length
+if mod(length(data), 2) ~= 0
+    error('Input data length must be even for 2B1Q.');
+end
+
+% Bit and symbol specs
+fs = 100;               % samples per second
+symbol_duration = 1;    % seconds per symbol (2 bits per symbol)
+samples_per_symbol = fs * symbol_duration;
+
+% Time vector for full signal
+num_symbols = length(data) / 2;
+time = 0:1/fs:(num_symbols * symbol_duration) - 1/fs;
+
+% 2B1Q Mapping Table
+map = containers.Map({'00', '01', '10', '11'}, [-3, -1, 1, 3]);
+
+% Generate 2B1Q waveform
+twoB1Q = [];
+for i = 1:2:length(data)
+    pair = sprintf('%d%d', data(i), data(i+1));
+    level = map(pair);
+    twoB1Q = [twoB1Q level * ones(1, samples_per_symbol)];
+end
+
+% Plotting
+figure;
+plot(time, twoB1Q, 'LineWidth', 2);
+axis([0 num_symbols * symbol_duration -3.5 3.5]);
+grid on;
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+title('2B1Q (2 Binary 1 Quaternary) Line Coding');
+xticks(0:symbol_duration:num_symbols);
+yticks([-3 -1 0 1 3]);
+
+
+*************Polar Bi Phase Manchester
+
+clc;
+clear;
+
+% Input binary data
+data = [1 0 1 1 0 0 1 0];
+
+% Bit and sampling parameters
+bit_duration = 1;     % seconds
+fs = 100;             % samples per second
+samples_per_bit = fs * bit_duration;
+half_samples = samples_per_bit / 2;
+
+% Time vector for full signal
+time = 0:1/fs:(length(data)*bit_duration) - 1/fs;
+
+% Initialize Manchester waveform
+manchester = [];
+
+for i = 1:length(data)
+    if data(i) == 1
+        % Bit 1: High to Low
+        bit_wave = [ones(1, half_samples), -ones(1, half_samples)];
+    else
+        % Bit 0: Low to High
+        bit_wave = [-ones(1, half_samples), ones(1, half_samples)];
+    end
+    manchester = [manchester bit_wave];
+end
+
+% Plot Manchester waveform
+figure;
+plot(time, manchester, 'LineWidth', 2);
+axis([0 length(data)*bit_duration -1.5 1.5]);
+grid on;
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+title('Polar Biphase (Manchester) Line Coding');
+xticks(0:bit_duration:length(data));
+yticks([-1 0 1]);
