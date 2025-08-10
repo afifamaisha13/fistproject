@@ -362,3 +362,39 @@ ylabel('Amplitude');
 title('Frequency vs Amplitude');
 %xlim([0 Fs/2]);               % Only show positive frequencies
 %grid on;
+
+
+************PCM
+
+clc;
+clear;
+
+% Parameters
+f = 5;                  % Frequency of analog signal (Hz)
+fs = 100;               % Sampling frequency (samples per second)
+t = 0:1/fs:1;           % Time vector for 1 second
+x = sin(2*pi*f*t);      % Original analog signal (sine wave)
+
+% Quantization
+n_bits = 2;                      % Number of bits per sample (e.g., 3 bits ? 8 levels)
+L = 2^n_bits;                    % Number of quantization levels
+x_min = min(x); x_max = max(x);
+q_step = (x_max - x_min) / (L - 1);   % Quantization step size
+
+% Uniform quantizer
+xq_index = round((x - x_min) / q_step);    % Get quantization index
+xq = xq_index * q_step + x_min;            % Quantized signal
+
+% Binary Encoding
+bin_pcm = dec2bin(xq_index, n_bits);       % Binary PCM values (as string matrix)
+
+% Plot original and quantized signal
+figure;
+plot(t, x, 'b', 'LineWidth', 1.5);
+hold on;
+stairs(t, xq, 'r', 'LineWidth', 1.5);
+xlabel('Time (s)');
+ylabel('Amplitude');
+title('PCM Encoding of a Sine Wave');
+legend('Original Signal', 'Quantized Signal');
+grid on;
